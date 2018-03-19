@@ -1,0 +1,444 @@
+/*
+-----Linux Kernel Module Programming - USB Device Driver 01:
+
+#LSUSB:
+-Note the Major/Minor Number ID information
+
+-----Linux Kernel Module Programming - USB Device Driver 02:
+*/
+
+/* */
+
+/* */
+
+
+	//mayflash_driver.c:
+
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/usb.h>  
+
+MODULE_LISCENSE("GPS");
+MODULE_AUTHOR("Samuel Whitty, Eric Romano");
+MODULE_DESCRIPTION("USB Mayflash Registration Driver");
+
+// probe function
+/* called on device insertion if there is no other driver set up to handle it */
+/* takes struct of usb_interface, which represents the logic? of the device */
+/* "usb_device_id *id" checks if the device at the given id is able to be managed, and our driver can manage it */
+static int mayflash_probe(struct usb_interface *interface, const struct usb_device_id *id)
+{
+	printk(KERN_INFO "[*] Mayflash Device drive (%04X:%04X) plugged\n", id->idVendor, id->idProduct);
+	return 0; //indicates that the device will be managed
+}
+
+// usb_device_id
+/* defines the driver with the given major/minor numbers */
+/* { USB_DEVICE(v, p) }, */ can be used to support multiple devices
+static struct usb_device_id driver_table[] = {
+	// note the major/minor number here
+	// 0079:1843
+	// check which represents vendor id, and which represents product id
+	{ USB_DEVICE(0x0781, 0x5406) },
+	{} /* TERMINATING ENTRY */
+}
+
+static void mayflash_disconnect(struct usb_interface *interface){
+	printk(KERN_INFO "[*] Mayflash Device drive removed\n");
+}
+
+static struct usb_driver mayflash_driver = {
+ 	.name = "Mayflash Gamecube Adaptor", // contains USB driver name
+ 	.id_table = mayflash_table, // of type usb_device_id, linked with major/minor numbers
+ 	.probe = mayflash_probe, //checks when device (usb) is plugged into device, not called if another driver is using it
+ 	.disconnect = mayflash_disconnect, //cleans up memory
+}
+
+//display information, register the driver
+static int __init mayflash_init(void){
+ 	int ret = -1
+ 	printk(KERN_INFO "[*]Constructor of Mayflash driver");
+ 	printk(KERN_INFO "\tRegistering Driver with Kernel");
+
+ 	ret = usb_register(&mayflash_driver); //registers the driver
+
+ 	printk(KERN_INFO "\nRegistration is complete");
+ 	return ret;
+}
+
+//deregister and destructor calls
+static void __exit mayflash_exit(void){
+	printk(KERN_INFO "[*]Destructor of Mayflash driver");
+	usb_deregister(&mayflash_driver);
+	printk(KERN_INFO "\tderegistration complete");
+}
+
+module_init(mayflash_init);
+module_exit(mayflash_exit);
+
+
+/* */
+
+/* */
+
+
+	//makefile:
+obj-m := mayflash_driver.o //create
+
+KERNEL_DIR = /lib/modules/$(shell uname -r)/build 
+PWD = $(shell pwd) 
+all:
+	$(MAKE) -C $(KERNEL_DIR) SUBDIRS=$(PWD) modules
+
+clean:
+	rm -rf *.o *.ko *.mod.* *.symvers *.order *-
+
+
+
+/* */
+
+/* */
+
+	//Command Line functions:
+
+/* there may be a usb_storage device in use that is handling our driver */
+/* if not, and the module still doesn't work, we've got to find where it's being used */
+
+/*
+Commands to make and insert driver to kernel:
+sudo Make
+sudo insmod mayflash_driver.ko
+dm //check messages
+*/
+
+//now we can write and read data from the device
+
+
+/* */
+
+/* */
+
+//-----Linux Kernel Module Programming - 03 Coding, Compiling the Module
+
+//-create file called: "mayflashHello.c"
+
+#include <linux/init.h>
+#include <linux/module.h>
+
+// create '.c' file to initialize, compile and use the module
+/* entry point for the application */
+static void hello_init(void){
+	printk(KERN_ALERT "Hello world, this is the Mayflash driver"); //announces the driver
+
+	return 0;
+}
+
+static void hello_exit(void){
+	printk(KERN_ALERT "Test: Mayflash module removed");
+}
+
+module_init(hello_init); //loaded module
+module_exit(hello_exit);
+
+
+/* */
+
+/* */
+
+
+	//makefile:
+/* use uname -r to get which headers/directories to set KDIR to */
+/* KDIR - compile against the headers */
+
+obj-m := mayflashHello.o //create
+
+KDIR = /usr/src/linux-headers-3.2.0-24-generic-pae
+PWD = $(shell pwd) 
+all:
+	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
+
+clean:
+	rm -rf *.o *.ko *.mod.* *.symvers *.order
+
+
+/*  */
+
+/*  */
+
+//-----Linux Kernel Module Programming - 04 Passing Arguments to Kernel Module
+
+//Changes Designated by STEP #
+
+//-create file called: "mayflashHello.c"
+
+#include <linux/init.h>
+#include <linux/module.h>
+//step 1
+/* add functionality for console input */
+#include <linux/moduleparam.h> //accesses functionality for parameters given from the console
+
+//step 2
+/* declare variable that holds the value passed to the module */
+int param_var = 0;
+
+//step 3 register (macro)
+//of form: "module_param(name_var, type, permissions"
+/* register variable to module */
+// types of permissions:
+/*
+	S_IRUSR -READING to USR (user)
+	S_IWUSR	-WRITING to USR (user)
+	S_IXUSR	-EXECUTION to USR (user)
+	S_IWGRP	-WRITING to GRP (group)
+	S_IRGRP	-READING to GRP (group)
+*/
+
+module_param(param_var, int S_IRUSR | S_IWUSR); //variable can be read AND written to
+
+void display(){
+	printk(KERN_ALERT "TEST: param = %d", param_var);
+}
+
+// create '.c' file to initialize, compile and use the module
+/* entry point for the application */
+static void hello_init(void){
+	printk(KERN_ALERT "Hello world, this is the Mayflash driver"); //announces the driver
+	display();
+	return 0;
+}
+
+static void hello_exit(void){
+	printk(KERN_ALERT "Test: Mayflash module removed");
+}
+
+module_init(hello_init); //loaded module
+module_exit(hello_exit);
+
+/*  */
+
+/*  */
+
+	//makefile:
+obj-m := mayflashHello.o //create
+
+KDIR = /usr/src/linux-headers-3.2.0-24-generic-pae
+PWD = $(shell pwd) 
+all:
+	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
+
+clean:
+	rm -rf *.o *.ko *.mod.* *.symvers *.order
+
+/*  */
+
+/*  */
+/*
+Testing:
+1-make the file
+2-insmod mayflashHello.ko param_val = "a number"
+3-rmmod mayflashHello.ko
+
+#NOTE for 04 - param_var can be of type array, make changes in areas like display();
+*/
+
+/*  */
+
+/*  */
+
+//-----Linux Kernel Module Programmin - 06 Char Driver, Block Driver, Overview of Writing Device Driver
+
+/*
+Getting information:
+
+Command: "ls -l tty0" 
+	-returns device file info, including what the numbers are
+
+Command: "mknod /dev/deviceFile b/c major# minor#" - create device file
+	-b/c determines if it's a block or character device'
+	-need be done as sudo. else permission is denied
+
+Command "ls -l my"
+	-gets device type: "b or c"
+	-can it be written/read/etc. to
+*/
+//user opens device file that invokes device driver, device driver talks to physical device
+
+/*  */
+
+/*  */
+
+//-----Linux Kernel Module Programmin - 07 Coding the Char Device
+
+mayflashModule.c
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/fs.h> 		//file operations struction: open/close/read/write to device
+#include <linux/cdev.h>		//char driver; makes cdev available
+#include <linux/semaphore>	//used to access semaphores
+#include <asm/uaccess.h>	//copy_to_user;copy_from_user
+
+//create structure
+struct mayflash_device {
+		char data[100];
+		struct semaphore sem;
+} virtual_device;
+
+//registering the device requires a cdev object and other useful variables, defined in a space outside of the stack to prevent memory issues
+
+struct cdev *mcdev; // my char device
+int major_number;	// stores major number, which is extracted from dev_t using - mknod /director/file c major minor
+int ret; //holds return values of functions, used in error correction
+
+dev_t dev_num;		// holds major number given to the user by the kernel
+
+#define DEVICE_NAME "mayflashdevice"
+
+//now need to write an entry point for the device driver
+//registers the capabilities of the 'dd' to the system
+
+static int driver_entry(void){
+
+	//(1) registering a device with the system
+	//register device with the system
+	//	-first allocate chrdev_region
+	//	-chrdev_region(dev_t*, uint fminor, uint count, char* name)
+	ret = alloc_chrdev_region(&dev_num, 0, 1, DEVICE_NAME);
+	if (ret < 0) {
+		printk(KERN_ALERT "mayflashdriver: failed to allocate a major number");
+		return ret; //propagate error
+	}
+	major_number = MAJOR(dev_num); //extract major number and store in our variable (MACRO)
+	printk(KERN_INFO  "mayflashdevice: major number is %d",major_number);
+	printk(KERN_INFO "\tuse \"mknod /dev/%s c %d 0\" for device file", DEVICE_NAME, major_number);
+
+	//(2) create and initialize cdev structure, initialize cdev
+	mcdev = cdev_alloc();
+	mcdev->ops = &fops; //not defined yet! contains file_operations for the cdev structure
+	mcdev->owner = THIS_MODULE;
+	//adding cdev to the kernel with:
+	//	int cdev_add(struct cdev* dev, dev_t num, unsigned int count)
+	ret = cdev_add(mcdev, dev_num, 1)
+	if(ret < 0) {
+		printk(KERN_ALERT "mayflashdevice: unable to add cdev to kernel");
+		return ret;
+	}
+
+
+	//initialize semaphore
+	sema_init(&virtual_device.sem,1); //initial value of 1 for the semaphore
+	return 0;
+}
+
+//deinitialization function: undos everything in reverse order
+//	1 - 
+static void driver_exit(void){
+	cdev_del(mcdev);
+
+	unregister_chrdev_region(dev_num,1);
+	printk(KERN_ALERT "mayflashdevice: unloaded module");
+}
+
+module_init(driver_entry);
+module_exit(driver_exit);
+
+//COMPILING WILL NOT WORK BECAUSE '&fops' has yet to be defined
+
+/*  */
+
+/*  */
+
+//-----Linux Kernel Module Programmin - 08 Coding the Char Device part 2
+
+//insert the following code on line 287, below the definition of the DEVICE_NAME
+
+//allow one process to open the device as mutual exclusive lock
+//	-uses mutex to share access to thread
+ssize_t device_open(struct inode *inode, struct file *filp){
+	if (down_interruptible(&virtual_device.sem) !=0){
+		printk(KERN_ALERT "mayflashcode: could not lock device during open");
+		return -1;
+	}
+
+	printk(KERN_INFO "mayflashdevice: opened device");
+	return 0;
+}
+
+ssize_t device_read(struct fuke* filp, char* bufStoreData, size_t bufCount, loff_t* curOffset){
+	//take data from kernel transfer to user
+	//	-done with copy_to_user(destination, sizeOfTransfer)
+	printk(KERN_INFO "mayflashdevice: Reading from device");
+	ret = copy_to_user(bufStoreData, virtual_device.data, bufCount);
+	return ret;
+}
+
+ssize_t device_write(struct file* filp, const char* bufSourceData, size_t bufCount, loff_t* curOffset){
+	//send data from user to kernel
+	//copy_from_user (dest, source, count)
+
+	printk(KERN_INFO "mayflashdevice: writing to device");
+	ret = copy_from_user(virtual_device.data, bufSourceData, bufCount)
+}
+
+//release mutex lock
+int device_close(struct inode * inode, struct file *filp){
+	
+	//calling up, opposite of semaphore down, to release mutex
+	//allows other processes to use the device
+	up(&virtual_device.sem);
+	printk(KERN_INFO "mayflashdevice: closed device");
+	return 0;
+}
+
+//which functions to call on user operation on a given device file
+struct file_operations fops = {
+	.owner = THIS_MODULE, 		// prevent unloading of module when operations in use
+	.open = device_open,		// point to the method to call when opening the device
+	.release = device_close,	// point to the method to call when closing the device
+	.write = device_write,		//... writing
+	.read = device_read			//... reading
+}
+
+
+/*  */
+
+/*  */
+
+	//userapp.c:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+
+#define DEVICE "/dev/mayflashdevice"
+
+
+int main () {
+	int i, fd;
+	char ch, write_buf[100], readD_buf[100];
+
+	fd = open (DEVICE, O_RDWR); //open for reading and writing
+
+	if (fd == -1){
+		printf("file %s either does not exist or has been locked by another process\n", DEVICE)
+	}
+
+	printf("r = read from device\nw = write to device\nenter command: ")
+	scanf ("%c", &ch);
+
+	switch (ch) {
+		case 'w':
+			printf("enter data: ");
+			scanf (" %[^\n]", write_buf);
+			write(fd, write_buf, sizeof(write_buf));
+			break;
+		case 'r':
+			read(fd, read_buf, sizeof(read_buf));
+			printf("device: %s\n", read_buf);
+			break;
+		default:
+			printf("command not recognised\n");
+			break;
+	}
+
+	return 0;
+}

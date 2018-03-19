@@ -1,0 +1,21 @@
+Identifying USB Devices:
+ Detailed information on attatched USB devices is available via:
+ 	/sys/kernel/debug/usb/devices - for manual searching
+lsusb: command/utility for displaying information about USB buses in the system and the devices connected to them under Linux kernal'
+	-lsusb : basic command
+	-lsusb -v : verbose output
+
+
+Writing a USB Device Driver: https://kernel.readthedocs.io/en/sphinx-samples/writing_usb_driver.html
+
+Linux USB Basics
+
+Commands:
+fdisk 
+	- '-l', drive doesnt register as drive
+
+'lsusb' gives address of drive
+		-different ports can give different device #'s
+		-sometimes same bus numbers, (common)
+		-major/minor numbers are identical
+		-check for event, capture event, get USB id
