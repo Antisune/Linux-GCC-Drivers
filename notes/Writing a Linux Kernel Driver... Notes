@@ -1,0 +1,23 @@
+Writing a Linux Kernel Driver for an Unknown USB Device
+
+Notes on: http://matthias.vallentin.net/blog/2007/04/writing-a-linux-kernel-driver-for-an-unknown-usb-device/
+
+USB Primer:
+(info to know about USBs and their relationship to the OS)
+-USB connects a host computer with peripheral devices
+-not constructed as a bus, topologically, but a point-to-point
+	-USB host controller polls each device for data to send
+-Linux supports two types of drivers:
+	-Host and Device
+		-Device: consists of one or more configurations which in turn haave one or more interfaces
+		-Interfaces contains zero or more endpoints to make up the form of USB comms
+		-endpoints are uni-directional
+			-Four types of endpoints:
+				-control, interrupt, bulk, isochronous
+				-Control: control device asynchronously; sending commands or retrieving status information
+					-every device has "endpoint 0"
+						-endpoint 0: used by USB core to initialize the device
+				-Interrupt: occur periodically and transfer small fixed-size data portions whenever the USB host asks the device
+					-commonly used by mice and keyboards
+				-Bulk/Isochronous: not relevant to article, 
+					read:https://lwn.net/Kernel/LDD3/
