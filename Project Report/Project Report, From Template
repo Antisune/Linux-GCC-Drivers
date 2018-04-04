@@ -1,0 +1,63 @@
+Mayflash Device Driver Project Report:
+Eric Romano and Samuel Whitty
+
+1. Intro
+1.1 Context
+-Review of background concepts
+1.2 Problem Statement
+-Goals, achievements, relevancies, motivations
+1.3 Result
+-Achievement of events defined in Problem Statement
+1.4 Outline
+-Outline the content of the report by the corresponding section's number
+-Generic statements about each section
+
+2. Background Information
+-Previous works that are being built upon, sources, diagrams, etc.
+-Cite sources that don't relate to classwork
+-Generally stick to concepts not addressed in class, overlap is fine when there is a relationship
+
+3. Result
+-Describe work that has been achieved
+-Review the interface with use cases
+	-Include screenshots for better understanding of output
+-Inclusion of UML shows an understanding of the systems
+-All claims need be supported with evidence
+	-Efficiency, Improvement over a previous system, etcetera
+-*Any figures must be created, not taken/referenced
+	-Figures must have a caption
+	-Elements must be described
+	-Aesthetically/graphically, figures must relate on the page
+
+4. Evaluation and Quality Assurance
+-Develop test cases that exercise typical execution paths of your software
+	-Self-critically and honestly do all tests
+-Things to test
+	-Claims about improved runtimes, (not relevant)
+	-Ease of use, user response
+-What to Collect:
+	-User responses: perform useability study
+	-CPU, memory useage, delays, etcetera
+	-Anything that can be collected should be
+-Scenarios:
+	-As many error cases as possible, ie. Catch errors in use/implementation, anything that could cause an errno
+	-Build small program that checks angles of degrees on controllers
+	-Build small program that 
+
+5. Conclusion
+-5.1 Summary
+	-Highlight main achievements
+-5.2 Relevance
+	-To course material and where the material relates in the context of computer science
+-5.3 Future Work
+	-Where to take what has been made
+	-What else can be made that relates to course material (the OS)
+
+Contributions of Team Members
+Student A
+Student B
+
+References
+
+Final Word
+-Description of project, description of events hat occured within the project, algorithms/software/anything with a diagram
